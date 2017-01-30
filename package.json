@@ -1,0 +1,12 @@
+{
+  "author": "Bernardo Ramos <berna.gensis@gmail.com>",
+  "name": "binn.js",
+  "description": "binn encoder and decoder in pure javascript",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/liteserver/binn.js.git"
+  },
+  "main": "binn.js",
+  "license": "MIT"
+}
