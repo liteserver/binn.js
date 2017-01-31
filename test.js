@@ -15,7 +15,7 @@ var tests = [
   -10, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000,
   -1000000000, -10000000000, -100000000000, -1000000000000,
   1.1, 0.1, -0.02,
-  'hello', 'world', Buffer.from("Hello"), Buffer.from("World"),
+  'hello', 'world', new Buffer("Hello"), new Buffer("World"),
   [1,2,3], [], {name: "Tim", age: 29}, {},
   {a: 1, b: 2, c: [1, 2, 3]}
 ];
