@@ -31,3 +31,10 @@ Decoding
 ```javascript
 var obj = binn.decode(data);
 ```
+
+Undefined
+---------
+
+The `undefined` value is enconded using the byte 0x03.
+
+It is an extended type derived from the storage type NOBYTES.
