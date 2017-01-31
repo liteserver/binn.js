@@ -170,7 +170,7 @@ Decoder.prototype.getVarint = function () {
   return value;
 };
 Decoder.prototype.parse = function () {
-  var type, size, count, value;  //, extType
+  var type, size, count, value;
 
   type = this.buffer[this.offset];
   this.offset++;
@@ -194,19 +194,15 @@ Decoder.prototype.parse = function () {
 
   // nil
   case 0x00:
-    this.offset++;
     return null;
   // true
   case 0x01:
-    this.offset++;
     return true;
   // false
   case 0x02:
-    this.offset++;
     return false;
   // undefined
   case 0x03:
-    this.offset++;
     return undefined;
 
   // uint8
@@ -320,11 +316,7 @@ function encode(value, builder) {
     // store the type
     builder.appendUInt8(0xC0);
     // store the size
-    if (size > 127) {
-      builder.appendInt32BE(size | 0x80000000);
-    } else {
-      builder.appendUInt8(size);
-    }
+    builder.appendInt32BE(size);
     // store the string
     builder.appendBuffer(value);
     return;
@@ -439,6 +431,8 @@ function encode(value, builder) {
   // Container Types
   if (type === "object") {
 
+    // create a new buffer builder
+    var builder2 = new BufferBuilder();
     var isArray = Array.isArray(value);
 
     if (isArray) {
@@ -449,14 +443,11 @@ function encode(value, builder) {
       count = keys.length;
     }
 
-    // create a new buffer builder
-    builder = new BufferBuilder();
-
     if (isArray) {
       type = 0xE0;
       // add the values to it
       for (var i = 0; i < count; i++) {
-        encode(value[i], builder);
+        encode(value[i], builder2);
       }
     }
     else {
@@ -469,10 +460,10 @@ function encode(value, builder) {
         if (size > 255) {
           throw new Error("Key is longer than 255: " + key);
         }
-        builder.appendUInt8(size);
-        builder.appendStringEx(key, size);
+        builder2.appendUInt8(size);
+        builder2.appendStringEx(key, size);
         // store the value
-        encode(value[key], builder);
+        encode(value[key], builder2);
       }
     }
 
@@ -480,7 +471,7 @@ function encode(value, builder) {
     var header = Buffer.allocUnsafe(9);
     header.writeUInt8(type, 0);
     // calculate the total size including the header
-    size = builder.length + 3;
+    size = builder2.length + 3;
     if (count > 127) size += 3;
     if (size  > 127) size += 3;
     var offset;
@@ -505,10 +496,15 @@ function encode(value, builder) {
       header = header.slice(0, offset);
     }
     // prepend the header in the builder and return the resulting buffer
-    builder.prependBuffer(header);
-    return builder.get();
+    builder2.prependBuffer(header);
+    if (builder) {
+      builder.appendBuffer(builder2.get());
+      return;
+    } else {
+      return builder2.get();
+    }
   }
 
   if (type === "function") return undefined;
-  throw new Error("Unknown type " + type);
+  throw new Error("Unknown type: " + type);
 }
