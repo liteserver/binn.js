@@ -1,18 +1,35 @@
 {
-  "author": "Bernardo Ramos <berna.gensis@gmail.com>",
+  "author": "Bernardo Ramos <berna.gensis@gmail.com>, Nolan Vanmoortel <ptp.nolan@gmail.com>",
   "name": "binn.js",
   "description": "binn encoder and decoder in pure javascript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/liteserver/binn.js.git"
   },
-  "main": "binn.js",
-  "devDependencies": {
-    "tape": "~1.0.2"
-  },
   "scripts": {
-    "test": "node test.js"
+    "build": "babel src --out-dir lib",
+    "test": "npm run test:eslint && npm run test:e2e",
+    "test:e2e": "node lib/test.js",
+    "test:eslint": "eslint src",
+    "prepublish": "npm run build"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.0",
+    "@babel/node": "^7.2.0",
+    "babel-preset-airbnb": "^3.1.0",
+    "chai": "^4.2.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.10.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-flowtype": "^3.2.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1"
   },
   "license": "MIT"
 }

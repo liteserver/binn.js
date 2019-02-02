@@ -16,20 +16,22 @@ Usage
 Header
 
 ```javascript
-var binn = require('binn.js');
+import { encode, decode } from 'binn.js';
+// Or with require
+const { encode, decode } = require('binn.js');
 ```
 
 Encoding
 
 ```javascript
-var obj = {hello: 'world', number: 123};
-var data = binn.encode(obj);
+const obj = { hello: 'world', number: 123 };
+const data = encode(obj);
 ```
 
 Decoding
 
 ```javascript
-var obj = binn.decode(data);
+const obj = decode(data);
 ```
 
 Undefined
