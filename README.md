@@ -1,6 +1,6 @@
 binn.js
 =======
-[![Build Status](https://travis-ci.org/liteserver/binn.js.svg?branch=master)](https://travis-ci.org/liteserver/binn.js)
+[![Build Status](https://travis-ci.org/MintT-SA/binn.js.svg?branch=master)](https://travis-ci.org/MintT-SA/binn.js)
 [![Deps](https://img.shields.io/badge/dependencies-none-brightgreen.svg)]()
 
 Binary serialization using the Binn format.
