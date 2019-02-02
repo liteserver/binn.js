@@ -36,7 +36,8 @@ function jsonableFunction() {
   console.log("can be json'ed");
 }
 
-jsonableFunction.toJSON = () => this.toString();
+// eslint-disable-next-line func-names
+jsonableFunction.toJSON = function () { return this.toString(); };
 
 const noop = () => {};
 
