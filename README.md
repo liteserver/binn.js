@@ -38,3 +38,11 @@ Undefined
 The `undefined` value is enconded using the byte 0x03.
 
 It is an extended type derived from the storage type NOBYTES.
+
+
+ES6
+---
+
+Another version in ES6:
+
+https://github.com/MintT-SA/binn.js
