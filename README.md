@@ -1,6 +1,6 @@
 binn.js
 =======
-[![Build Status](https://travis-ci.org/liteserver/binn.js.svg?branch=master)](https://travis-ci.org/liteserver/binn.js)
+[![Build Status](https://travis-ci.org/MintT-SA/binn.js.svg?branch=master)](https://travis-ci.org/MintT-SA/binn.js)
 [![Deps](https://img.shields.io/badge/dependencies-none-brightgreen.svg)]()
 
 Binary serialization using the Binn format.
@@ -16,20 +16,22 @@ Usage
 Header
 
 ```javascript
-var binn = require('binn.js');
+import { encode, decode } from 'binn.js';
+// Or with require
+const { encode, decode } = require('binn.js');
 ```
 
 Encoding
 
 ```javascript
-var obj = {hello: 'world', number: 123};
-var data = binn.encode(obj);
+const obj = { hello: 'world', number: 123 };
+const data = encode(obj);
 ```
 
 Decoding
 
 ```javascript
-var obj = binn.decode(data);
+const obj = decode(data);
 ```
 
 Undefined
