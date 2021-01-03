@@ -3,7 +3,7 @@
 // modified BufferBuilder
 
 function BufferBuilder(initialCapacity) {
-  var buffer = Buffer.isBuffer(initialCapacity) ? initialCapacity : new Buffer(initialCapacity || 512);
+  var buffer = Buffer.isBuffer(initialCapacity) ? initialCapacity : Buffer.alloc(initialCapacity || 512);
   this.buffers = [buffer];
 
   this.writeIndex = 0;
@@ -40,7 +40,7 @@ BufferBuilder.prototype.getBufferWithSpace = function(size) {
     /* slice the current buffer */
     this.buffers[this.buffers.length-1] = buf.slice(0, this.writeIndex);
     /* add a new buffer */
-    var newbuf = new Buffer(Math.max(buf.length*2, size));
+    var newbuf = Buffer.alloc(Math.max(buf.length*2, size));
     this.buffers.push(newbuf);
     this.writeIndex = 0;
     buf = newbuf
