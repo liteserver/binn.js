@@ -269,8 +269,7 @@ Decoder.prototype.parse = function () {
 
   // blob
   case 0xC0:
-    size = this.buffer.readInt32BE(this.offset);
-    this.offset += 4;
+    size = this.getVarint();
     return this.blob(size);
 
   }
@@ -316,7 +315,11 @@ function encode(value, builder) {
     // store the type
     builder.appendUInt8(0xC0);
     // store the size
-    builder.appendInt32BE(size);
+    if (size > 127) {
+      builder.appendInt32BE(size | 0x80000000);
+    } else {
+      builder.appendUInt8(size);
+    }
     // store the string
     builder.appendBuffer(value);
     return;
