@@ -74,6 +74,34 @@ BufferBuilder.prototype.appendFloatBE = makeAppender(Buffer.prototype.writeFloat
 BufferBuilder.prototype.appendDoubleLE = makeAppender(Buffer.prototype.writeDoubleLE, 8);
 BufferBuilder.prototype.appendDoubleBE = makeAppender(Buffer.prototype.writeDoubleBE, 8);
 
+BufferBuilder.prototype.appendMapKey = function(key) {
+
+  var sign = (key < 0);
+  if (sign) key = -key;
+
+  if (key <= 0x3F) {
+    this.appendUInt8( (sign << 6) | key );
+  } else if (key <= 0xFFF) {
+    this.appendUInt8( 0x80 | (sign << 4) | ((key & 0xF00) >> 8) );
+    this.appendUInt8( key & 0xFF );
+  } else if (key <= 0xFFFFF) {
+    this.appendUInt8( 0xA0 | (sign << 4) | ((key & 0xF0000) >> 16) );
+    this.appendUInt8( (key & 0xFF00) >> 8 );
+    this.appendUInt8( key & 0xFF );
+  } else if (key <= 0xFFFFFFF) {
+    this.appendUInt8( 0xC0 | (sign << 4) | ((key & 0xF000000) >> 24) );
+    this.appendUInt8( (key & 0xFF0000) >> 16 );
+    this.appendUInt8( (key & 0xFF00) >> 8 );
+    this.appendUInt8( key & 0xFF );
+  } else {
+    if (sign) key = -key;
+    this.appendUInt8( 0xE0 );
+    this.appendUInt32BE( key );
+  }
+
+  return this;
+};
+
 BufferBuilder.prototype.appendStringEx = function(str, size, encoding) {
   if (!size) return;
   var buf = this.getBufferWithSpace(size);
@@ -131,8 +159,7 @@ Decoder.prototype.list = function (length) {
 Decoder.prototype.map = function (length) {
   var value = {};
   for (var i = 0; i < length; i++) {
-    var key = this.buffer.readInt32BE(this.offset);
-    this.offset += 4;
+    var key = this.getMapKey();
     value[key] = this.parse();
   }
   return value;
@@ -168,6 +195,38 @@ Decoder.prototype.getVarint = function () {
     this.offset++;
   }
   return value;
+};
+Decoder.prototype.getMapKey = function () {
+  var value = this.buffer[this.offset]; this.offset++;
+  var type = c & 0xE0;
+  var sign = c & 0x10;
+  var key;
+
+  if ((value & 0x80) == 0) {
+    sign = value & 0x40;
+    key = value & 0x3F;
+  } else if (type == 0x80) {
+    key = value & 0x0F;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+  } else if (type == 0xA0) {
+    key = value & 0x0F;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+  } else if (type == 0xC0) {
+    key = value & 0x0F;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+    key = (key << 8) | this.buffer[this.offset]; this.offset++;
+  } else if (type == 0xE0) {
+    key = this.buffer.readInt32BE(this.offset);
+    this.offset += 4;
+  } else {
+    return null;
+  }
+
+  if (sign) key = -key;
+
+  return key;
 };
 Decoder.prototype.parse = function () {
   var type, size, count, value;
@@ -437,6 +496,7 @@ function encode(value, builder) {
     // create a new buffer builder
     var builder2 = new BufferBuilder();
     var isArray = Array.isArray(value);
+    var isMap;
 
     if (isArray) {
       count = value.length;
@@ -444,17 +504,38 @@ function encode(value, builder) {
     else {
       var keys = encodeableKeys(value);
       count = keys.length;
+      isMap = true;
+      for (var i = 0; i < count; i++) {
+        if (Number.isInteger(keys[i]) == false) {
+          isMap = false;
+          break;
+        }
+      }
     }
 
     if (isArray) {
-      type = 0xE0;
+      type = 0xE0; // binn list
       // add the values to it
       for (var i = 0; i < count; i++) {
         encode(value[i], builder2);
       }
     }
+    else if (isMap) {
+      type = 0xE1; // binn map
+      // add the key value pairs to it
+      for (var i = 0; i < count; i++) {
+        var key = keys[i];
+        // store the key
+        if (key > 0x7fffffff) {
+          throw new Error("Key is bigger than 0x7fffffff: " + key);
+        }
+        builder2.appendMapKey(key);
+        // store the value
+        encode(value[key], builder2);
+      }
+    }
     else {
-      type = 0xE2;
+      type = 0xE2; // binn object
       // add the key value pairs to it
       for (var i = 0; i < count; i++) {
         var key = keys[i];

@@ -17,7 +17,8 @@ var tests = [
   1.1, 0.1, -0.02,
   'hello', 'world', Buffer.from("Hello"), Buffer.from("World"),
   [1,2,3], [], {name: "Tim", age: 29}, {},
-  {a: 1, b: 2, c: [1, 2, 3]}
+  {a: 1, b: 2, c: [1, 2, 3]},
+  {12: 'first', 1234: 'second', 123456789: 'third'}
 ];
 
 test('codec works as expected', function(assert) {
